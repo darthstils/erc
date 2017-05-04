@@ -1,3 +1,4 @@
 ebin/*
 .idea/*
 .rebar/*
+erl_crash.dump
