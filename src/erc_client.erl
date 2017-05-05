@@ -11,23 +11,31 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
+-export([
+  start_link/0
+]).
 
 %% gen_server callbacks
--export([init/1,
+-export([
+  init/1,
   handle_call/3,
   handle_cast/2,
   handle_info/2,
   terminate/2,
-  code_change/3]).
+  code_change/3
+]).
+
+-export([
+  state/0
+]).
 
 -define(SERVER, ?MODULE).
 
--record(state, {}).
+-record(state, {config = #{}, connected = false}).
 %%%===================================================================
 %%% API
 %%%===================================================================
-
+state() -> gen_server:call(?MODULE,state).
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts the server
@@ -73,6 +81,8 @@ init([]) ->
   {noreply, NewState :: #state{}, timeout() | hibernate} |
   {stop, Reason :: term(), Reply :: term(), NewState :: #state{}} |
   {stop, Reason :: term(), NewState :: #state{}}).
+handle_call(state,_From,State) ->
+  {reply,State,State};
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 %%--------------------------------------------------------------------
