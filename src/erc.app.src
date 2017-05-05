@@ -1,12 +1,13 @@
 {application, erc,
  [
-  {description, ""},
-  {vsn, "1"},
+  {description, "Redis Client"},
+  {vsn, "1.0.0"},
   {registered, []},
   {applications, [
                   kernel,
                   stdlib
                  ]},
+  {modules,[]},
   {mod, { erc_app, []}},
   {env, []}
  ]}.
