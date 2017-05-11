@@ -1,3 +1,8 @@
 ebin/*
+deps/*
+_rel/*
 .idea/*
 .rebar/*
+erl_crash.dump
+erc.d
+.erlang.mk/*
