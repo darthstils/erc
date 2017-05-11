@@ -2,7 +2,8 @@
 
 -export([
   start/0,
-  stop/0
+  stop/0,
+  config/2
 ]).
 
 start() ->
@@ -11,3 +12,7 @@ start() ->
 
 stop() ->
     application:stop(erc).
+
+
+config(_,_) ->
+  [].
