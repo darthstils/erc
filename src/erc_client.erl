@@ -121,7 +121,7 @@ init([]) -> {ok, #state{}}.
   {noreply, NewState :: #state{}, timeout() | hibernate} |
   {stop, Reason :: term(), Reply :: term(), NewState :: #state{}} |
   {stop, Reason :: term(), NewState :: #state{}}).
-handle_call({execute,Data},From,State) ->
+handle_call({execute,Data},From,#state{connected = true, sock = Sock} = State) when Sock /= null ->
   gen_tcp:send(State#state.sock,raw_package(length(Data),Data)),
   {noreply,State#state{ queue = [From] ++ State#state.queue}};
 handle_call(state,_From, State) -> {reply,State,State};
@@ -224,10 +224,18 @@ raw_package(Length,Data) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-parse_package(<<?BULK:8,?NEGATIVE:8,?ONE:8,_/binary>>)   -> {ok,undefined};
-parse_package(<<?BULK:8,Rest/binary>>)                   -> {ok,binary:split(Rest,[?DELEMITER],[global,trim_all])};
-parse_package(<<?STRING:8,Rest/binary>>)                 -> {ok,binary:split(Rest,[?DELEMITER],[global,trim_all])};
-parse_package(<<?ERROR:8,Rest/binary>>)                  -> {error,binary:split(Rest,[?DELEMITER],[global,trim_all])}.
+parse_package(<<?BULK:8,?NEGATIVE:8,?ONE:8,_/binary>>)    -> response(ok,[undefined]);
+parse_package(<<?STRING:8,Rest/binary>>)                  -> response(ok,binary:split(Rest,[?DELEMITER],[global,trim_all]));
+parse_package(<<?ERROR:8,Rest/binary>>)                   -> response(error,binary:split(Rest,[?DELEMITER],[global,trim_all]));
+parse_package(<<?BULK:8,Rest/binary>>)                    ->
+  [_Len,Data] = binary:split(Rest,[?DELEMITER],[global,trim_all]),
+  response(ok,[Data]).
+%%--------------------------------------------------------------------
+%% @doc
+%%
+%% @end
+%%--------------------------------------------------------------------
+response(Result,[Data]) -> {Result,Data}.
 %%--------------------------------------------------------------------
 %% @doc
 %%
@@ -238,4 +246,4 @@ to_bin(X) when is_atom(X)     -> atom_to_binary(X,latin1);
 to_bin(X) when is_float(X)    -> io_lib:format("~.2f",[X]);
 to_bin(X) when is_binary(X)   -> X;
 to_bin(X) when is_integer(X)  -> integer_to_binary(X);
-to_bin(_) -> <<>>.
+to_bin(X)                     -> term_to_binary(X).
